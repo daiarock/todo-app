@@ -11,11 +11,10 @@ cd todo-app
 composer install
 yarn install
 
-yarn run watch
 cp .env.example .env
-php argisan key:generate
+php artisan key:generate
+touch database/database.sqlite
 php artisan migrate
-php artisan seed
 php artisan serve
 ```
 
