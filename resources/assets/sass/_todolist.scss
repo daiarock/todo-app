@@ -1,0 +1,58 @@
+.contents-wrapper {
+  max-width: 500px;
+  margin: 20px auto;
+  background: #fff;
+  box-shadow: 1px 10px 20px 0px rgba(218, 215, 206,0.8);
+}
+.new-task{
+  padding: 20px;
+  display: flex;
+  border-bottom: 1px solid #e7eaec;
+}
+.new-task-input {
+  flex: 2;
+}
+.new-task-btn {
+  margin-left: 10px;
+}
+.todo-list {
+  list-style: none;
+  padding: 0;
+}
+.todo-list li{
+  padding-top: 20px;
+  padding-left: 30px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+}
+.todo-list .view {
+  display: flex;
+}
+.todo-list .view label{
+  width: 100%;
+  cursor: pointer;
+}
+.todo-list .view p{
+  flex: 2;
+  font-size: 16px;
+  margin-bottom: 0;
+}
+.todo-list .view strike {
+  color: #c7c7c7;
+}
+.todo-list li:not(:first-of-type) {
+  border-top: 1px solid #e7eaec;
+}
+.todo-list .view .btn {
+  margin-left: 5px;
+}
+.todo-list li.editing .edit {
+  display: block;
+
+}
+.todo-list li.editing .view {
+  display: none;
+}
+.todo-list li .edit {
+  display: none;
+}
