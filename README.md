@@ -5,7 +5,7 @@
 # Install
 
 ```
-git clone git@github.com:daiarock/todo-app.git
+git clone https://github.com/daiarock/todo-app.git
 cd todo-app
 
 composer install
