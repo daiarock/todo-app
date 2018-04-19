@@ -11824,7 +11824,23 @@ module.exports = function normalizeComponent (
     __WEBPACK_IMPORTED_MODULE_0_axios___default.a.interceptors.request.use(function (config) {
       config.headers['X-CSRF-TOKEN'] = window.Laravel.csrfToken;
       config.headers['X-Requested-With'] = 'XMLHttpRequest';
+      config.headers['Authorization'] = 'Bearer ' + localStorage.getItem('jwt-token');
       return config;
+    });
+
+    // Intercept the response and ...
+    __WEBPACK_IMPORTED_MODULE_0_axios___default.a.interceptors.response.use(function (response) {
+      // ...get the token from the header or response data if exists, and save it.
+      var token = response.headers['Authorization'] || response.data['token'];
+      if (token) {
+        localStorage.setItem('jwt-token', token);
+      }
+
+      return response;
+    }, function (error) {
+      // Also, if we receive a Bad Request / Unauthorized error
+      console.log(error);
+      return Promise.reject(error);
     });
   }
 });
@@ -12119,12 +12135,14 @@ module.exports = __webpack_require__(47);
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__router__ = __webpack_require__(15);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_http__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__stores_userStore__ = __webpack_require__(58);
 
 /**
  * First we will load all of this project's JavaScript dependencies which
  * includes Vue and other libraries. It is a great starting point when
  * building robust, powerful web applications using Vue and Laravel.
  */
+
 
 
 
@@ -12144,6 +12162,7 @@ var app = new Vue({
   el: '#app',
   created: function created() {
     __WEBPACK_IMPORTED_MODULE_1__services_http__["a" /* default */].init();
+    __WEBPACK_IMPORTED_MODULE_2__stores_userStore__["a" /* default */].init();
   }
 }).$mount('#app');
 
@@ -15116,6 +15135,7 @@ module.exports = Component.exports
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__services_http__ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__stores_userStore__ = __webpack_require__(58);
 //
 //
 //
@@ -15148,6 +15168,20 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 
@@ -15159,7 +15193,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     return {
       tasks: [],
       name: '',
-      editedTask: null
+      editedTask: null,
+      userState: __WEBPACK_IMPORTED_MODULE_1__stores_userStore__["a" /* default */].state
     };
   },
 
@@ -15225,6 +15260,13 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     cancelEdit: function cancelEdit(task) {
       this.editedTask = null;
       task.name = this.beforeEditCache;
+    },
+    logout: function logout() {
+      var _this6 = this;
+
+      __WEBPACK_IMPORTED_MODULE_1__stores_userStore__["a" /* default */].logout(function () {
+        _this6.$router.push('/login');
+      });
     }
   },
 
@@ -16114,173 +16156,225 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("div", { staticClass: "new-task" }, [
-      _c("div", { staticClass: "new-task-input" }, [
-        _c("input", {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.name,
-              expression: "name"
-            }
-          ],
-          staticClass: "form-control",
-          attrs: { type: "text", placeholder: "New Task" },
-          domProps: { value: _vm.name },
-          on: {
-            input: function($event) {
-              if ($event.target.composing) {
-                return
-              }
-              _vm.name = $event.target.value
-            }
-          }
-        })
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "new-task-btn" }, [
-        _vm.name === ""
-          ? _c(
-              "button",
-              {
-                staticClass: "btn btn-primary",
-                attrs: { disabled: "disabled" }
-              },
-              [_vm._v("\n          Add task\n        ")]
-            )
-          : _c(
-              "button",
-              { staticClass: "btn btn-primary", on: { click: _vm.addTask } },
-              [_vm._v("\n          Add task\n        ")]
-            )
-      ])
-    ]),
-    _vm._v(" "),
-    _c(
-      "ul",
-      { staticClass: "todo-list" },
-      _vm._l(_vm.tasks, function(task) {
-        return _c(
-          "li",
-          { key: task.id, class: { editing: task == _vm.editedTask } },
-          [
-            _c("div", { staticClass: "view" }, [
-              task.is_done
-                ? _c(
-                    "p",
-                    [_c("strike", [_vm._v(" " + _vm._s(task.name) + " ")])],
-                    1
-                  )
-                : _c("p", [
-                    _c(
-                      "label",
-                      {
-                        attrs: { title: "Double click to Edit" },
-                        on: {
-                          dblclick: function($event) {
-                            _vm.editTask(task)
-                          }
-                        }
-                      },
-                      [_vm._v(_vm._s(task.name))]
-                    )
-                  ]),
-              _vm._v(" "),
-              task.is_done
-                ? _c(
-                    "button",
+    _vm.userState.authenticated
+      ? _c("div", [
+          _c("p", { staticClass: "text-center" }, [
+            _c("strong", [
+              _vm._v("Hello, " + _vm._s(_vm.userState.user.name) + "!")
+            ])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "contents-wrapper" }, [
+            _c("div", { staticClass: "new-task" }, [
+              _c("div", { staticClass: "new-task-input" }, [
+                _c("input", {
+                  directives: [
                     {
-                      staticClass: "btn btn-sm btn-success",
-                      on: {
-                        click: function($event) {
-                          _vm.completeTask(task)
-                        }
-                      }
-                    },
-                    [_vm._v("Undo")]
-                  )
-                : _c(
-                    "button",
-                    {
-                      staticClass: "btn btn-sm btn-success",
-                      on: {
-                        click: function($event) {
-                          _vm.completeTask(task)
-                        }
-                      }
-                    },
-                    [_vm._v("Done")]
-                  ),
-              _vm._v(" "),
-              _c(
-                "button",
-                {
-                  staticClass: "btn btn-sm btn-danger",
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.name,
+                      expression: "name"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "text", placeholder: "New Task" },
+                  domProps: { value: _vm.name },
                   on: {
-                    click: function($event) {
-                      _vm.removeTask(task)
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.name = $event.target.value
                     }
                   }
-                },
-                [_vm._v("Remove")]
-              )
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "new-task-btn" }, [
+                _vm.name === ""
+                  ? _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        attrs: { disabled: "disabled" }
+                      },
+                      [_vm._v("\n            Add task\n          ")]
+                    )
+                  : _c(
+                      "button",
+                      {
+                        staticClass: "btn btn-primary",
+                        on: { click: _vm.addTask }
+                      },
+                      [_vm._v("\n            Add task\n          ")]
+                    )
+              ])
             ]),
             _vm._v(" "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: task.name,
-                  expression: "task.name"
-                },
-                {
-                  name: "task-focus",
-                  rawName: "v-task-focus",
-                  value: task == _vm.editedTask,
-                  expression: "task == editedTask"
-                }
-              ],
-              staticClass: "edit form-control",
-              attrs: { type: "text" },
-              domProps: { value: task.name },
-              on: {
-                blur: function($event) {
-                  _vm.doneEdit(task)
-                },
-                keyup: [
-                  function($event) {
-                    if (
-                      !("button" in $event) &&
-                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
-                    ) {
-                      return null
-                    }
-                    _vm.doneEdit(task)
-                  },
-                  function($event) {
-                    if (
-                      !("button" in $event) &&
-                      _vm._k($event.keyCode, "esc", 27, $event.key, "Escape")
-                    ) {
-                      return null
-                    }
-                    _vm.cancelEdit(task)
+            _c(
+              "ul",
+              { staticClass: "todo-list" },
+              _vm._l(_vm.tasks, function(task) {
+                return _c(
+                  "li",
+                  { key: task.id, class: { editing: task == _vm.editedTask } },
+                  [
+                    _c("div", { staticClass: "view" }, [
+                      task.is_done
+                        ? _c(
+                            "p",
+                            [
+                              _c("strike", [
+                                _vm._v(" " + _vm._s(task.name) + " ")
+                              ])
+                            ],
+                            1
+                          )
+                        : _c("p", [
+                            _c(
+                              "label",
+                              {
+                                attrs: { title: "Double click to Edit" },
+                                on: {
+                                  dblclick: function($event) {
+                                    _vm.editTask(task)
+                                  }
+                                }
+                              },
+                              [_vm._v(_vm._s(task.name))]
+                            )
+                          ]),
+                      _vm._v(" "),
+                      task.is_done
+                        ? _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-sm btn-success",
+                              on: {
+                                click: function($event) {
+                                  _vm.completeTask(task)
+                                }
+                              }
+                            },
+                            [_vm._v("Undo")]
+                          )
+                        : _c(
+                            "button",
+                            {
+                              staticClass: "btn btn-sm btn-success",
+                              on: {
+                                click: function($event) {
+                                  _vm.completeTask(task)
+                                }
+                              }
+                            },
+                            [_vm._v("Done")]
+                          ),
+                      _vm._v(" "),
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-sm btn-danger",
+                          on: {
+                            click: function($event) {
+                              _vm.removeTask(task)
+                            }
+                          }
+                        },
+                        [_vm._v("Remove")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: task.name,
+                          expression: "task.name"
+                        },
+                        {
+                          name: "task-focus",
+                          rawName: "v-task-focus",
+                          value: task == _vm.editedTask,
+                          expression: "task == editedTask"
+                        }
+                      ],
+                      staticClass: "edit form-control",
+                      attrs: { type: "text" },
+                      domProps: { value: task.name },
+                      on: {
+                        blur: function($event) {
+                          _vm.doneEdit(task)
+                        },
+                        keyup: [
+                          function($event) {
+                            if (
+                              !("button" in $event) &&
+                              _vm._k(
+                                $event.keyCode,
+                                "enter",
+                                13,
+                                $event.key,
+                                "Enter"
+                              )
+                            ) {
+                              return null
+                            }
+                            _vm.doneEdit(task)
+                          },
+                          function($event) {
+                            if (
+                              !("button" in $event) &&
+                              _vm._k(
+                                $event.keyCode,
+                                "esc",
+                                27,
+                                $event.key,
+                                "Escape"
+                              )
+                            ) {
+                              return null
+                            }
+                            _vm.cancelEdit(task)
+                          }
+                        ],
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(task, "name", $event.target.value)
+                        }
+                      }
+                    })
+                  ]
+                )
+              })
+            )
+          ]),
+          _vm._v(" "),
+          _c("p", { staticClass: "text-center" }, [
+            _c(
+              "a",
+              {
+                on: {
+                  click: function($event) {
+                    _vm.logout()
                   }
-                ],
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(task, "name", $event.target.value)
                 }
-              }
-            })
-          ]
+              },
+              [_vm._v("Log out")]
+            )
+          ])
+        ])
+      : _c(
+          "p",
+          [
+            _vm._v("\n    please "),
+            _c("router-link", { attrs: { to: "/login" } }, [_vm._v("sign in.")])
+          ],
+          1
         )
-      })
-    )
   ])
 }
 var staticRenderFns = []
@@ -16300,7 +16394,7 @@ if (false) {
 var disposed = false
 var normalizeComponent = __webpack_require__(5)
 /* script */
-var __vue_script__ = null
+var __vue_script__ = __webpack_require__(59)
 /* template */
 var __vue_template__ = __webpack_require__(41)
 /* template functional */
@@ -16348,68 +16442,150 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div", { staticClass: "row" }, [
+    _c("div", { staticClass: "col-md-4 col-md-offset-4" }, [
+      _c("div", { staticClass: "panel panel-default" }, [
+        _vm._m(0),
+        _vm._v(" "),
+        _c("div", { staticClass: "panel-body" }, [
+          _c(
+            "form",
+            {
+              attrs: {
+                "accept-charset": "UTF-8",
+                role: "form",
+                onsubmit: "return false;"
+              }
+            },
+            [
+              _vm.showAlert
+                ? _c(
+                    "div",
+                    {
+                      staticClass: "alert alert-danger",
+                      attrs: { role: "alert" }
+                    },
+                    [
+                      _vm._v(
+                        "\n              " +
+                          _vm._s(_vm.alertMessage) +
+                          "\n            "
+                      )
+                    ]
+                  )
+                : _vm._e(),
+              _vm._v(" "),
+              _c("fieldset", [
+                _c("div", { staticClass: "form-group" }, [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.email,
+                        expression: "email"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: {
+                      id: "email",
+                      type: "email",
+                      placeholder: "E-mail",
+                      required: "",
+                      autofocus: ""
+                    },
+                    domProps: { value: _vm.email },
+                    on: {
+                      keyup: function($event) {
+                        if (
+                          !("button" in $event) &&
+                          _vm._k(
+                            $event.keyCode,
+                            "enter",
+                            13,
+                            $event.key,
+                            "Enter"
+                          )
+                        ) {
+                          return null
+                        }
+                        return _vm.login($event)
+                      },
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.email = $event.target.value
+                      }
+                    }
+                  })
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "form-group" }, [
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.password,
+                        expression: "password"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: {
+                      id: "password",
+                      type: "password",
+                      placeholder: "Password",
+                      required: "",
+                      autofocus: ""
+                    },
+                    domProps: { value: _vm.password },
+                    on: {
+                      keyup: function($event) {
+                        if (
+                          !("button" in $event) &&
+                          _vm._k(
+                            $event.keyCode,
+                            "enter",
+                            13,
+                            $event.key,
+                            "Enter"
+                          )
+                        ) {
+                          return null
+                        }
+                        return _vm.login($event)
+                      },
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.password = $event.target.value
+                      }
+                    }
+                  })
+                ]),
+                _vm._v(" "),
+                _c("input", {
+                  staticClass: "btn btn-lg btn-success btn-block",
+                  attrs: { type: "submit", value: "Login" },
+                  on: { click: _vm.login }
+                })
+              ])
+            ]
+          )
+        ])
+      ])
+    ])
+  ])
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "row" }, [
-      _c("div", { staticClass: "col-md-4 col-md-offset-4" }, [
-        _c("div", { staticClass: "panel panel-default" }, [
-          _c("div", { staticClass: "panel-heading" }, [
-            _c("h3", { staticClass: "panel-title" }, [_vm._v("Please sign in")])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "panel-body" }, [
-            _c("form", { attrs: { "accept-charset": "UTF-8", role: "form" } }, [
-              _c("fieldset", [
-                _c("div", { staticClass: "form-group" }, [
-                  _c("input", {
-                    staticClass: "form-control",
-                    attrs: {
-                      placeholder: "E-mail",
-                      name: "email",
-                      type: "text"
-                    }
-                  })
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group" }, [
-                  _c("input", {
-                    staticClass: "form-control",
-                    attrs: {
-                      placeholder: "Password",
-                      name: "password",
-                      type: "password",
-                      value: ""
-                    }
-                  })
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "checkbox" }, [
-                  _c("label", [
-                    _c("input", {
-                      attrs: {
-                        name: "remember",
-                        type: "checkbox",
-                        value: "Remember Me"
-                      }
-                    }),
-                    _vm._v(" Remember Me\n              ")
-                  ])
-                ]),
-                _vm._v(" "),
-                _c("input", {
-                  staticClass: "btn btn-lg btn-success btn-block",
-                  attrs: { type: "submit", value: "Login" }
-                })
-              ])
-            ])
-          ])
-        ])
-      ])
+    return _c("div", { staticClass: "panel-heading" }, [
+      _c("h3", { staticClass: "panel-title" }, [_vm._v("Please sign in")])
     ])
   }
 ]
@@ -46372,6 +46548,149 @@ if (typeof jQuery === 'undefined') {
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 48 */,
+/* 49 */,
+/* 50 */,
+/* 51 */,
+/* 52 */,
+/* 53 */,
+/* 54 */,
+/* 55 */,
+/* 56 */,
+/* 57 */,
+/* 58 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__services_http__ = __webpack_require__(6);
+
+
+/* harmony default export */ __webpack_exports__["a"] = ({
+  debug: true,
+  state: {
+    user: {},
+    authenticated: false
+  },
+
+  login: function login(email, password) {
+    var _this = this;
+
+    var successCb = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var errorCb = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+    var login_param = { email: email, password: password };
+    __WEBPACK_IMPORTED_MODULE_0__services_http__["a" /* default */].post('authenticate', login_param, function (res) {
+      _this.state.user = res.data.user;
+      _this.state.authenticated = true;
+      successCb();
+    }, function (error) {
+      errorCb();
+    });
+  },
+  setCurrentUser: function setCurrentUser() {
+    var _this2 = this;
+
+    __WEBPACK_IMPORTED_MODULE_0__services_http__["a" /* default */].get('me', function (res) {
+      _this2.state.user = res.data.user;
+      _this2.state.authenticated = true;
+    });
+  },
+
+
+  // To log out, we just need to remove the token
+  logout: function logout() {
+    var _this3 = this;
+
+    var successCb = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var errorCb = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+    __WEBPACK_IMPORTED_MODULE_0__services_http__["a" /* default */].get('logout', function () {
+      localStorage.removeItem('jwt-token');
+      _this3.state.authenticated = false;
+      successCb();
+    }, errorCb);
+  },
+
+
+  /**
+   * Init the store.
+   */
+  init: function init() {
+    this.setCurrentUser();
+  }
+});
+
+/***/ }),
+/* 59 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__stores_userStore__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__services_http__ = __webpack_require__(6);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
+
+
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      email: '',
+      password: '',
+      showAlert: false,
+      alertMessage: ''
+    };
+  },
+
+  methods: {
+    login: function login() {
+      var _this = this;
+
+      __WEBPACK_IMPORTED_MODULE_0__stores_userStore__["a" /* default */].login(this.email, this.password, function (res) {
+        _this.$router.push('/');
+      }, function (error) {
+        _this.showAlert = true;
+        _this.alertMessage = 'Wrong email or password.';
+      });
+    }
+  }
+});
 
 /***/ })
 /******/ ]);

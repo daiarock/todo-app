@@ -1,37 +1,51 @@
 <template>
   <div>
-      <div class="new-task">
-        <div class="new-task-input">
-          <input type="text" class="form-control" v-model="name" placeholder="New Task">
+    <div v-if="userState.authenticated">
+      <p class="text-center"><strong>Hello, {{ userState.user.name }}!</strong></p>
+
+      <div class="contents-wrapper">
+
+        <div class="new-task">
+          <div class="new-task-input">
+            <input type="text" class="form-control" v-model="name" placeholder="New Task">
+          </div>
+          <div class="new-task-btn">
+            <button class="btn btn-primary" disabled="disabled" v-if="name === ''">
+              Add task
+            </button>
+            <button class="btn btn-primary" @click='addTask' v-else>
+              Add task
+            </button>
+          </div>
         </div>
-        <div class="new-task-btn">
-          <button class="btn btn-primary" disabled="disabled" v-if="name === ''">
-            Add task
-          </button>
-          <button class="btn btn-primary" @click='addTask' v-else>
-            Add task
-          </button>
-        </div>
+
+        <ul class="todo-list">
+          <li v-for="task in tasks" :key="task.id" :class="{editing: task == editedTask}">
+            <div class="view">
+              <p v-if="task.is_done"><strike> {{ task.name }} </strike></p>
+              <p v-else><label @dblclick="editTask(task)" title="Double click to Edit">{{ task.name }}</label></p>
+                   
+              <button @click="completeTask(task)" class="btn btn-sm btn-success" v-if="task.is_done">Undo</button>
+              <button @click="completeTask(task)" class="btn btn-sm btn-success" v-else>Done</button>
+
+              <button @click="removeTask(task)" class="btn btn-sm btn-danger">Remove</button>
+            </div>
+            <input class="edit form-control" type="text" v-model="task.name" v-task-focus="task == editedTask" @blur="doneEdit(task)" @keyup.enter="doneEdit(task)" @keyup.esc="cancelEdit(task)">
+          </li>
+        </ul>
       </div>
 
-      <ul class="todo-list">
-        <li v-for="task in tasks" :key="task.id" :class="{editing: task == editedTask}">
-          <div class="view">
-            <p v-if="task.is_done"><strike> {{ task.name }} </strike></p>
-            <p v-else><label @dblclick="editTask(task)" title="Double click to Edit">{{ task.name }}</label></p>
-                 
-            <button @click="completeTask(task)" class="btn btn-sm btn-success" v-if="task.is_done">Undo</button>
-            <button @click="completeTask(task)" class="btn btn-sm btn-success" v-else>Done</button>
+      <p class="text-center"><a @click="logout()">Log out</a></p>
+    </div>
 
-            <button @click="removeTask(task)" class="btn btn-sm btn-danger">Remove</button>
-          </div>
-          <input class="edit form-control" type="text" v-model="task.name" v-task-focus="task == editedTask" @blur="doneEdit(task)" @keyup.enter="doneEdit(task)" @keyup.esc="cancelEdit(task)">
-        </li>
-      </ul>
+    <p v-else>
+      please <router-link to="/login">sign in.</router-link>
+    </p>
   </div>
 </template>
 <script>
   import http from '../services/http'
+  import userStore from '../stores/userStore'
 
   export default {
     mounted() {
@@ -43,6 +57,7 @@
         tasks: [],
         name: '',
         editedTask: null,
+        userState: userStore.state
       }
     },
 
@@ -104,6 +119,12 @@
         this.editedTask = null;
         task.name = this.beforeEditCache;
       },
+
+      logout() {
+        userStore.logout( () => {
+          this.$router.push('/login')
+        })
+      }
     },
 
     directives: {

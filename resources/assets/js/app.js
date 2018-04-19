@@ -7,6 +7,7 @@
 
 import router from './router'
 import http from './services/http'
+import userStore from './stores/userStore'
 
 require('./bootstrap');
 
@@ -24,6 +25,7 @@ const app = new Vue({
   el: '#app',
   created () {
     http.init()
+    userStore.init()
   },
   
 }).$mount('#app');

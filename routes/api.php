@@ -13,9 +13,12 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::group(['middleware' => 'api'], function () {
+    Route::post('authenticate',  'AuthenticateController@authenticate');
+    Route::get('logout',  'AuthenticateController@logout')->middleware('jwt.refresh');
+
+    Route::group(['middleware' => 'jwt.auth'], function () {
+        Route::resource('tasks', 'TaskController')->only(['index', 'update', 'store', 'destroy']);
+        Route::get('me',  'AuthenticateController@getCurrentUser');
+    });
 });
-
-
-Route::resource('/tasks', 'TaskController')->only(['index', 'update', 'store', 'destroy']);

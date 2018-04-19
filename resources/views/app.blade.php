@@ -18,9 +18,7 @@
         </header>
         <main>
             <div id="app">
-                <div class="contents-wrapper">
-                    <router-view></router-view>
-                </div>
+                <router-view></router-view>
             </div>
         </main>
         <footer class="footer">
