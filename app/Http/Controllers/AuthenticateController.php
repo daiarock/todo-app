@@ -29,44 +29,7 @@ class AuthenticateController extends Controller
 
         // all good so return the token
         return response()->json(compact('user', 'token'));
-
-        // $credentials = $request->only('email', 'password');
-
-        // $validator = Validator::make($credentials, [
-        //     'email' => 'required|email',
-        //     'password' => 'required'
-        // ]);
-
-        // if ($validator->fails()) {
-        //     return response()
-        //         ->json([
-        //             'code' => 1,
-        //             'message' => 'Validation failed.',
-        //             'errors' => $validator->errors()
-        //         ], 422);
-        // }
-
-        // $token = JWTAuth::attempt($credentials);
-
-        // if ($token) {
-        //     return response()->json(['token' => $token]);
-        // } else {
-        //     return response()->json(['code' => 2, 'message' => 'Invalid credentials.'], 401);
-        // }
     }
-
-    // /**
-    //  * Get the user by token.
-    //  *
-    //  * @param  Request  $request
-    //  * @return \Illuminate\Http\JsonResponse
-    //  */
-    // public function getUser(Request $request)
-    // {
-    //     JWTAuth::setToken($request->input('token'));
-    //     $user = JWTAuth::toUser();
-    //     return response()->json($user);
-    // }
 
     public function getCurrentUser()
     {
@@ -76,5 +39,6 @@ class AuthenticateController extends Controller
 
     public function logout()
     {
+      //
     }
 }
